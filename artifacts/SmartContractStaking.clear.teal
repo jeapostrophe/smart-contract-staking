@@ -1,8 +1,7 @@
 #pragma version 10
 
 contract.SmartContractStaking.clear_state_program:
-    // contract.py:43-44
-    // ##################################################
+    // contract.py:16
     // class SmartContractStaking(ARC4Contract):
     int 1
     return

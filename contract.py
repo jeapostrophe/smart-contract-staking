@@ -12,35 +12,7 @@ from algopy import (
     subroutine,
     op
 )
-##################################################
-# function: max (internal)
-# arguments
-# - a, a number
-# - b, a number
-# purpose: determine greater of two numbers
-# pre-conditions: None
-# post-conditions: None
-# notes:
-# - use ifs
-##################################################
-@subroutine
-def max(a: UInt64, b: UInt64) -> UInt64:
-    return a
-##################################################
-# function: min (internal)
-# arguments
-# - a, a number
-# - b, a number
-# purpose: determine greater of two numbers
-# pre-conditions: None
-# post-conditions: None
-# notes:
-# - use ifs
-##################################################
-@subroutine
-def min(a: UInt64, b: UInt64) -> UInt64:
-    return a
-##################################################
+
 class SmartContractStaking(ARC4Contract):
     ##############################################
     # function: __init__ (builtin)
@@ -68,7 +40,7 @@ class SmartContractStaking(ARC4Contract):
     @arc4.abimethod
     def setup(self, owner: arc4.Address) -> None:
         self.enforce_step(UInt64(0)) # Non-existant
-        assert Txn.sender == Global.creator_address, "must be creator"
+        self.require_creator()
         self.funder = Txn.sender
         self.owner = owner.native
     ##############################################
@@ -86,7 +58,7 @@ class SmartContractStaking(ARC4Contract):
         self.enforce_step(UInt64(1)) # Fresh
         self.require_owner()
         assert period > 0, "period must be greater than 0" 
-        assert period <= 5, "period must be less than or equal to 0"
+        assert period <= 5, "period must be less than or equal to 5"
         self.period = period.native
     ##############################################
     # function: fill
@@ -174,7 +146,7 @@ class SmartContractStaking(ARC4Contract):
         balance = op.balance(Global.current_application_address)
         min_balance = op.Global.min_balance
         available_balance = balance - min_balance - fee
-        assert amount <= available_balance, "amount must be less than or equal to balance"
+        assert amount <= available_balance, "balance available"
         assert available_balance - amount.native >= mab, "mab available"
         itxn.Payment(
             amount=amount.native,
@@ -213,10 +185,9 @@ class SmartContractStaking(ARC4Contract):
     @arc4.abimethod
     def close(self) -> None:
         self.enforce_step(UInt64(4)) # Full
-        # assert Txn.sender is owner
-        # assert mab is 0
+        self.require_owner()
+        assert self.calculate_mab() == 0, "mab is zero"
         self.delete_application()
-        # todo close app ...
     ##############################################
     # function: require_payment (internal)
     # arguments: None
@@ -229,6 +200,16 @@ class SmartContractStaking(ARC4Contract):
         assert gtxn.PaymentTransaction(0).sender == who, "payment sender accurate"
         assert gtxn.PaymentTransaction(0).amount == amount, "payment amount accurate"
         assert gtxn.PaymentTransaction(0).receiver == Global.current_application_address, "payment receiver accurate"
+    ##############################################
+    # function: require_creator (internal)
+    # arguments: None
+    # purpose: check that sender is creator
+    # pre-conditions: None
+    # post-conditions: None
+    ##############################################
+    @subroutine
+    def require_creator(self) -> None: 
+        assert Txn.sender == Global.creator_address, "must be creator" 
     ##############################################
     # function: require_funder (internal)
     # arguments: None
@@ -313,21 +294,24 @@ class SmartContractStaking(ARC4Contract):
     #       p = 1 / (self.period x 12) or 1 / (period)
     # - mimumum allowable balance =
     #     total x min(1, p x max(0, (period - (now() - funding + y x seconds-in-month)) / seconds-in-month))
-    # - should be okay to distibute up to 166.67Mi
-    #   which is over 5 times the highest airdrop
-    #   amount (10Bi / 60 = 166.67Mi)
     ##############################################
     @subroutine
     def calculate_mab(self) -> UInt64:
         now = Global.latest_timestamp
-        y = UInt64(12) # lockup delay
+        y = UInt64(12) # vesting delay
         seconds_in_month = UInt64(2628000)
         p = UInt64(12) * self.period # lockup period
-        if now < self.funding + y * seconds_in_month: # before lockup (0 or funding)
-            return self.funding 
-        elif now > self.funding + (y + p) * seconds_in_month: # after lockup
-            return UInt64(0)
-        else: # during lockup
-            m =  (now - (self.funding + y * seconds_in_month)) // seconds_in_month # elapsed months
-            return (self.total * (p - m)) // p
+        locked_up = now < self.funding + p * seconds_in_month
+        fully_vested = now >= self.funding + (y + p) * seconds_in_month
+        lockup_seconds = p * seconds_in_month
+        # if locked up then total
+        # elif fully vested then zero
+        # else calculate mab using elapsed months
+        if locked_up: #  if locked up then total
+            return self.total 
+        elif fully_vested: #  elif fully vested then zero
+            return UInt64(0) 
+        else: #  else calculate mab using elapsed months
+            m =  (now - (self.funding + lockup_seconds)) // seconds_in_month # elapsed months after lockup
+            return (self.total * (y - m)) // y
 
