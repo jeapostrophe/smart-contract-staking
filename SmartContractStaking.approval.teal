@@ -1,0 +1,1297 @@
+#pragma version 10
+
+contract.SmartContractStaking.approval_program:
+    txn ApplicationID
+    bnz main_entrypoint@2
+    callsub __init__
+
+main_entrypoint@2:
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txn NumAppArgs
+    bz main_bare_routing@13
+    method "setup(address)void"
+    method "configure(uint64)void"
+    method "fill(uint64,uint64)void"
+    method "participate(byte[],byte[],uint64,uint64,uint64,byte[])void"
+    method "withdraw(uint64)uint64"
+    method "transfer(address)void"
+    method "close()void"
+    txna ApplicationArgs 0
+    match main_setup_route@4 main_configure_route@5 main_fill_route@6 main_participate_route@7 main_withdraw_route@8 main_transfer_route@9 main_close_route@10
+    err // reject transaction
+
+main_setup_route@4:
+    // contract.py:58-68
+    // ##############################################
+    // # function: constructor
+    // # arguments:
+    // # - owner, who is the beneficiary
+    // # - funder, who is this
+    // # - total, total amount without lockup
+    // # purpose: create contract
+    // # pre-conditions: None
+    // # post-conditions: set owner and funder
+    // ##############################################
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txna ApplicationArgs 1
+    // contract.py:58-68
+    // ##############################################
+    // # function: constructor
+    // # arguments:
+    // # - owner, who is the beneficiary
+    // # - funder, who is this
+    // # - total, total amount without lockup
+    // # purpose: create contract
+    // # pre-conditions: None
+    // # post-conditions: set owner and funder
+    // ##############################################
+    // @arc4.abimethod
+    callsub setup
+    int 1
+    return
+
+main_configure_route@5:
+    // contract.py:74-84
+    // ##############################################
+    // # function: configure
+    // # arguments:
+    // # - period, lockup period
+    // # purpose: set lockup period
+    // # pre-conditions
+    // # - funder and owner initialized
+    // # - period 0
+    // # post-conditions: set owner and funder
+    // ##############################################
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txna ApplicationArgs 1
+    // contract.py:74-84
+    // ##############################################
+    // # function: configure
+    // # arguments:
+    // # - period, lockup period
+    // # purpose: set lockup period
+    // # pre-conditions
+    // # - funder and owner initialized
+    // # - period 0
+    // # post-conditions: set owner and funder
+    // ##############################################
+    // @arc4.abimethod
+    callsub configure
+    int 1
+    return
+
+main_fill_route@6:
+    // contract.py:91-105
+    // ##############################################
+    // # function: fill
+    // # arguments:
+    // # - total, how much to fill
+    // # purpose: fund it
+    // # pre-conditions
+    // # - period must be set
+    // # - funding and total must be uninitialized
+    // # - must be combined with pyament transaction
+    // #   for total amount
+    // # - must be only callable by funder
+    // # post-conditions:
+    // # - total and funding are set to arguments
+    // ##############################################
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    // contract.py:91-105
+    // ##############################################
+    // # function: fill
+    // # arguments:
+    // # - total, how much to fill
+    // # purpose: fund it
+    // # pre-conditions
+    // # - period must be set
+    // # - funding and total must be uninitialized
+    // # - must be combined with pyament transaction
+    // #   for total amount
+    // # - must be only callable by funder
+    // # post-conditions:
+    // # - total and funding are set to arguments
+    // ##############################################
+    // @arc4.abimethod
+    callsub fill
+    int 1
+    return
+
+main_participate_route@7:
+    // contract.py:113-132
+    // ##############################################
+    // # function: participate
+    // # arguments:
+    // # - key registration params
+    // # purpose: allow contract to particpate in
+    // #          consensus
+    // # pre-conditions
+    // # - must be callable by owner only
+    // # - must be combined with transaction transfering
+    // #   one fee into the contract account
+    // # post-conditions:
+    // # - contract generates itnx for keyreg
+    // # notes:
+    // # - fee payment is to prevent potential draining
+    // #   into fees, even though it is not likely that
+    // #   a user may attempt to drain their funds
+    // # - MAB is not relevant due to the fee payment
+    // #   added
+    // ##############################################
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txna ApplicationArgs 1
+    extract 2 0
+    txna ApplicationArgs 2
+    extract 2 0
+    txna ApplicationArgs 3
+    txna ApplicationArgs 4
+    txna ApplicationArgs 5
+    txna ApplicationArgs 6
+    extract 2 0
+    // contract.py:113-132
+    // ##############################################
+    // # function: participate
+    // # arguments:
+    // # - key registration params
+    // # purpose: allow contract to particpate in
+    // #          consensus
+    // # pre-conditions
+    // # - must be callable by owner only
+    // # - must be combined with transaction transfering
+    // #   one fee into the contract account
+    // # post-conditions:
+    // # - contract generates itnx for keyreg
+    // # notes:
+    // # - fee payment is to prevent potential draining
+    // #   into fees, even though it is not likely that
+    // #   a user may attempt to drain their funds
+    // # - MAB is not relevant due to the fee payment
+    // #   added
+    // ##############################################
+    // @arc4.abimethod
+    callsub participate
+    int 1
+    return
+
+main_withdraw_route@8:
+    // contract.py:146-168
+    // ##############################################
+    // # function: withdraw
+    // # arguments:
+    // # - amount
+    // # returns:
+    // # - next mab
+    // # purpose: extract funds from contract
+    // # pre-conditions
+    // # - only callable by owner
+    // # - let balance be the current balance of the
+    // #   contract
+    // # - let fee be one fee value
+    // # - balance - amount - fee >= mag
+    // # post-conditions:
+    // # - transfer amount from the contract account
+    // #   to owner
+    // # notes:
+    // # - fee taken out of amount transfered to
+    // #   owner
+    // # - can get amount available for withdra  by
+    // #   simulating zero withdraw
+    // ##############################################
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txna ApplicationArgs 1
+    // contract.py:146-168
+    // ##############################################
+    // # function: withdraw
+    // # arguments:
+    // # - amount
+    // # returns:
+    // # - next mab
+    // # purpose: extract funds from contract
+    // # pre-conditions
+    // # - only callable by owner
+    // # - let balance be the current balance of the
+    // #   contract
+    // # - let fee be one fee value
+    // # - balance - amount - fee >= mag
+    // # post-conditions:
+    // # - transfer amount from the contract account
+    // #   to owner
+    // # notes:
+    // # - fee taken out of amount transfered to
+    // #   owner
+    // # - can get amount available for withdra  by
+    // #   simulating zero withdraw
+    // ##############################################
+    // @arc4.abimethod
+    callsub withdraw
+    itob
+    byte 0x151f7c75
+    swap
+    concat
+    log
+    int 1
+    return
+
+main_transfer_route@9:
+    // contract.py:184-197
+    // ##############################################
+    // # function: transfer
+    // # arguments:
+    // # - owner, new owner
+    // # purpose: change owner
+    // # pre-conditions
+    // # - only callable by the owner
+    // # post-conditions:
+    // # - new owner
+    // # notes:
+    // # - fee taken out of amount transfered to
+    // #   owner
+    // ##############################################
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txna ApplicationArgs 1
+    // contract.py:184-197
+    // ##############################################
+    // # function: transfer
+    // # arguments:
+    // # - owner, new owner
+    // # purpose: change owner
+    // # pre-conditions
+    // # - only callable by the owner
+    // # post-conditions:
+    // # - new owner
+    // # notes:
+    // # - fee taken out of amount transfered to
+    // #   owner
+    // ##############################################
+    // @arc4.abimethod
+    callsub transfer
+    int 1
+    return
+
+main_close_route@10:
+    // contract.py:203-213
+    // ##############################################
+    // # function: close
+    // # arguments: None
+    // # purpose: deletes contract
+    // # pre-conditions:
+    // # - mab is 0
+    // # post-conditions:
+    // # - contract is deleted
+    // # - account closed out to owner if it has a balance
+    // ##############################################
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    callsub close
+    int 1
+    return
+
+main_bare_routing@13:
+    // contract.py:43-44
+    // ##################################################
+    // class SmartContractStaking(ARC4Contract):
+    txn OnCompletion
+    !
+    assert // reject transaction
+    txn ApplicationID
+    !
+    assert // is creating
+    int 1
+    return
+
+
+// contract.SmartContractStaking.setup(owner: bytes) -> void:
+setup:
+    // contract.py:58-69
+    // ##############################################
+    // # function: constructor
+    // # arguments:
+    // # - owner, who is the beneficiary
+    // # - funder, who is this
+    // # - total, total amount without lockup
+    // # purpose: create contract
+    // # pre-conditions: None
+    // # post-conditions: set owner and funder
+    // ##############################################
+    // @arc4.abimethod
+    // def setup(self, owner: arc4.Address) -> None:
+    proto 1 0
+    // contract.py:70
+    // self.enforce_step(UInt64(0)) # Non-existant
+    int 0
+    callsub enforce_step
+    // contract.py:71
+    // assert Txn.sender == Global.creator_address, "must be creator"
+    txn Sender
+    global CreatorAddress
+    ==
+    assert // must be creator
+    // contract.py:72
+    // self.funder = Txn.sender
+    byte "funder"
+    txn Sender
+    app_global_put
+    // contract.py:73
+    // self.owner = owner.native
+    byte "owner"
+    frame_dig -1
+    app_global_put
+    retsub
+
+
+// contract.SmartContractStaking.enforce_step(n: uint64) -> void:
+enforce_step:
+    // contract.py:252-262
+    // ##############################################
+    // # function: enforce_step (internal)
+    // # arguments:
+    // # - step, what step to enforce
+    // # purpose:
+    // # - enforce that method may be allowed in step
+    // # pre-conditions: None
+    // # post-conditions: None
+    // ##############################################
+    // @subroutine
+    // def enforce_step(self, n: UInt64) -> None:
+    proto 1 0
+    // contract.py:263-287
+    // match n:
+    //     case UInt64(0): # Non-existent
+    //         assert self.funder == Global.zero_address, "funder must not be initialized"
+    //         assert self.owner == Global.zero_address, "owner must not be initialized"
+    //         assert self.period == 0, "period must not be initialize"
+    //         assert self.funding == 0, "funding must not be initialize"
+    //         assert self.total == 0, "total must not be initialized"
+    //     case UInt64(1): # Fresh
+    //         assert self.funder == Global.creator_address, "funder must be initialize"
+    //         assert self.owner != Global.zero_address, "owner must be initialized"
+    //         assert self.period == 0, "period must not be initialized"
+    //         assert self.funding == 0, "funding must not be initialized"
+    //         assert self.total == 0, "total must not be initialized"
+    //     case UInt64(2): # Ready
+    //         assert self.funder == Global.creator_address, "funder must be initialize"
+    //         assert self.owner != Global.zero_address, "owner must be initialized"
+    //         assert self.period <= 5, "period within bounds"
+    //         assert self.funding == 0, "funding must not be initialized"
+    //         assert self.total == 0, "total must not be initialized"
+    //     case UInt64(3): # Full
+    //         assert self.funder == Global.creator_address, "funder must be initialize"
+    //         assert self.owner != Global.zero_address, "owner must be initialized"
+    //         assert self.period <= 5, "period within bounds"
+    //         assert self.funding > 0, "funding must be initialized"
+    //         assert self.total > 0, "total must be initialized"
+    frame_dig -1
+    switch enforce_step_switch_case_0@1 enforce_step_switch_case_1@2 enforce_step_switch_case_2@3 enforce_step_switch_case_3@4
+    retsub
+
+enforce_step_switch_case_0@1:
+    // contract.py:265
+    // assert self.funder == Global.zero_address, "funder must not be initialized"
+    int 0
+    byte "funder"
+    app_global_get_ex
+    assert // check funder exists
+    global ZeroAddress
+    ==
+    assert // funder must not be initialized
+    // contract.py:266
+    // assert self.owner == Global.zero_address, "owner must not be initialized"
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    global ZeroAddress
+    ==
+    assert // owner must not be initialized
+    // contract.py:267
+    // assert self.period == 0, "period must not be initialize"
+    int 0
+    byte "period"
+    app_global_get_ex
+    assert // check period exists
+    !
+    assert // period must not be initialize
+    // contract.py:268
+    // assert self.funding == 0, "funding must not be initialize"
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    !
+    assert // funding must not be initialize
+    // contract.py:269
+    // assert self.total == 0, "total must not be initialized"
+    int 0
+    byte "total"
+    app_global_get_ex
+    assert // check total exists
+    !
+    assert // total must not be initialized
+    b enforce_step_switch_case_next@6
+
+enforce_step_switch_case_1@2:
+    // contract.py:271
+    // assert self.funder == Global.creator_address, "funder must be initialize"
+    int 0
+    byte "funder"
+    app_global_get_ex
+    assert // check funder exists
+    global CreatorAddress
+    ==
+    assert // funder must be initialize
+    // contract.py:272
+    // assert self.owner != Global.zero_address, "owner must be initialized"
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    global ZeroAddress
+    !=
+    assert // owner must be initialized
+    // contract.py:273
+    // assert self.period == 0, "period must not be initialized"
+    int 0
+    byte "period"
+    app_global_get_ex
+    assert // check period exists
+    !
+    assert // period must not be initialized
+    // contract.py:274
+    // assert self.funding == 0, "funding must not be initialized"
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    !
+    assert // funding must not be initialized
+    // contract.py:275
+    // assert self.total == 0, "total must not be initialized"
+    int 0
+    byte "total"
+    app_global_get_ex
+    assert // check total exists
+    !
+    assert // total must not be initialized
+    b enforce_step_switch_case_next@6
+
+enforce_step_switch_case_2@3:
+    // contract.py:277
+    // assert self.funder == Global.creator_address, "funder must be initialize"
+    int 0
+    byte "funder"
+    app_global_get_ex
+    assert // check funder exists
+    global CreatorAddress
+    ==
+    assert // funder must be initialize
+    // contract.py:278
+    // assert self.owner != Global.zero_address, "owner must be initialized"
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    global ZeroAddress
+    !=
+    assert // owner must be initialized
+    // contract.py:279
+    // assert self.period <= 5, "period within bounds"
+    int 0
+    byte "period"
+    app_global_get_ex
+    assert // check period exists
+    int 5
+    <=
+    assert // period within bounds
+    // contract.py:280
+    // assert self.funding == 0, "funding must not be initialized"
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    !
+    assert // funding must not be initialized
+    // contract.py:281
+    // assert self.total == 0, "total must not be initialized"
+    int 0
+    byte "total"
+    app_global_get_ex
+    assert // check total exists
+    !
+    assert // total must not be initialized
+    b enforce_step_switch_case_next@6
+
+enforce_step_switch_case_3@4:
+    // contract.py:283
+    // assert self.funder == Global.creator_address, "funder must be initialize"
+    int 0
+    byte "funder"
+    app_global_get_ex
+    assert // check funder exists
+    global CreatorAddress
+    ==
+    assert // funder must be initialize
+    // contract.py:284
+    // assert self.owner != Global.zero_address, "owner must be initialized"
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    global ZeroAddress
+    !=
+    assert // owner must be initialized
+    // contract.py:285
+    // assert self.period <= 5, "period within bounds"
+    int 0
+    byte "period"
+    app_global_get_ex
+    assert // check period exists
+    int 5
+    <=
+    assert // period within bounds
+    // contract.py:286
+    // assert self.funding > 0, "funding must be initialized"
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    assert // funding must be initialized
+    // contract.py:287
+    // assert self.total > 0, "total must be initialized"
+    int 0
+    byte "total"
+    app_global_get_ex
+    assert // check total exists
+    assert // total must be initialized
+
+enforce_step_switch_case_next@6:
+    retsub
+
+
+// contract.SmartContractStaking.configure(period: bytes) -> void:
+configure:
+    // contract.py:74-85
+    // ##############################################
+    // # function: configure
+    // # arguments:
+    // # - period, lockup period
+    // # purpose: set lockup period
+    // # pre-conditions
+    // # - funder and owner initialized
+    // # - period 0
+    // # post-conditions: set owner and funder
+    // ##############################################
+    // @arc4.abimethod
+    // def configure(self, period: arc4.UInt64) -> None:
+    proto 1 0
+    // contract.py:86
+    // self.enforce_step(UInt64(1)) # Fresh
+    int 1
+    callsub enforce_step
+    // contract.py:87
+    // self.require_owner()
+    callsub require_owner
+    // contract.py:88
+    // assert period > 0, "period must be greater than 0"
+    frame_dig -1
+    byte 0x0000000000000000
+    b>
+    assert // period must be greater than 0
+    // contract.py:89
+    // assert period <= 5, "period must be less than or equal to 0"
+    frame_dig -1
+    byte 0x0000000000000005
+    b<=
+    assert // period must be less than or equal to 0
+    // contract.py:90
+    // self.period = period.native
+    frame_dig -1
+    btoi
+    byte "period"
+    swap
+    app_global_put
+    retsub
+
+
+// contract.SmartContractStaking.require_owner() -> void:
+require_owner:
+    // contract.py:242-250
+    // ##############################################
+    // # function: require_owner (internal)
+    // # arguments: None
+    // # purpose: check that sender is owner
+    // # pre-conditions: None
+    // # post-conditions: None
+    // ##############################################
+    // @subroutine
+    // def require_owner(self) -> None:
+    proto 0 0
+    // contract.py:251
+    // assert Txn.sender == self.owner, "must be owner"
+    txn Sender
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    ==
+    assert // must be owner
+    retsub
+
+
+// contract.SmartContractStaking.fill(total: bytes, funding: bytes) -> void:
+fill:
+    // contract.py:91-106
+    // ##############################################
+    // # function: fill
+    // # arguments:
+    // # - total, how much to fill
+    // # purpose: fund it
+    // # pre-conditions
+    // # - period must be set
+    // # - funding and total must be uninitialized
+    // # - must be combined with pyament transaction
+    // #   for total amount
+    // # - must be only callable by funder
+    // # post-conditions:
+    // # - total and funding are set to arguments
+    // ##############################################
+    // @arc4.abimethod
+    // def fill(self, total: arc4.UInt64, funding: arc4.UInt64) -> None:
+    proto 2 0
+    // contract.py:107
+    // self.enforce_step(UInt64(2)) # Ready
+    int 2
+    callsub enforce_step
+    // contract.py:108
+    // self.require_funder()
+    callsub require_funder
+    // contract.py:109
+    // self.require_payment(self.funder, total.native)
+    int 0
+    byte "funder"
+    app_global_get_ex
+    assert // check funder exists
+    frame_dig -2
+    btoi
+    dup
+    cover 2
+    callsub require_payment
+    // contract.py:110
+    // assert total > 0, "payment is greater than zero"
+    frame_dig -2
+    byte 0x0000000000000000
+    b>
+    assert // payment is greater than zero
+    // contract.py:111
+    // self.total = total.native
+    byte "total"
+    swap
+    app_global_put
+    // contract.py:112
+    // self.funding = funding.native
+    frame_dig -1
+    btoi
+    byte "funding"
+    swap
+    app_global_put
+    retsub
+
+
+// contract.SmartContractStaking.require_funder() -> void:
+require_funder:
+    // contract.py:232-240
+    // ##############################################
+    // # function: require_funder (internal)
+    // # arguments: None
+    // # purpose: check that sender is funder
+    // # pre-conditions: None
+    // # post-conditions: None
+    // ##############################################
+    // @subroutine
+    // def require_funder(self) -> None:
+    proto 0 0
+    // contract.py:241
+    // assert Txn.sender == self.funder, "must be funder"
+    txn Sender
+    int 0
+    byte "funder"
+    app_global_get_ex
+    assert // check funder exists
+    ==
+    assert // must be funder
+    retsub
+
+
+// contract.SmartContractStaking.require_payment(who: bytes, amount: uint64) -> void:
+require_payment:
+    // contract.py:219-228
+    //     # todo close app ...
+    // ##############################################
+    // # function: require_payment (internal)
+    // # arguments: None
+    // # purpose: check payment
+    // # pre-conditions: None
+    // # post-conditions: None
+    // ##############################################
+    // @subroutine
+    // def require_payment(self, who: Account, amount: UInt64) -> None:
+    proto 2 0
+    // contract.py:229
+    // assert gtxn.PaymentTransaction(0).sender == who, "payment sender accurate"
+    int 0
+    gtxns TypeEnum
+    int pay
+    ==
+    assert // transaction type is pay
+    int 0
+    gtxns Sender
+    frame_dig -2
+    ==
+    assert // payment sender accurate
+    // contract.py:230
+    // assert gtxn.PaymentTransaction(0).amount == amount, "payment amount accurate"
+    int 0
+    gtxns Amount
+    frame_dig -1
+    ==
+    assert // payment amount accurate
+    // contract.py:231
+    // assert gtxn.PaymentTransaction(0).receiver == Global.current_application_address, "payment receiver accurate"
+    int 0
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert // payment receiver accurate
+    retsub
+
+
+// contract.SmartContractStaking.participate(vote_k: bytes, sel_k: bytes, vote_fst: bytes, vote_lst: bytes, vote_kd: bytes, sp_key: bytes) -> void:
+participate:
+    // contract.py:113-133
+    // ##############################################
+    // # function: participate
+    // # arguments:
+    // # - key registration params
+    // # purpose: allow contract to particpate in
+    // #          consensus
+    // # pre-conditions
+    // # - must be callable by owner only
+    // # - must be combined with transaction transfering
+    // #   one fee into the contract account
+    // # post-conditions:
+    // # - contract generates itnx for keyreg
+    // # notes:
+    // # - fee payment is to prevent potential draining
+    // #   into fees, even though it is not likely that
+    // #   a user may attempt to drain their funds
+    // # - MAB is not relevant due to the fee payment
+    // #   added
+    // ##############################################
+    // @arc4.abimethod
+    // def participate(self, vote_k: Bytes, sel_k: Bytes, vote_fst: arc4.UInt64, vote_lst: arc4.UInt64, vote_kd: arc4.UInt64, sp_key: Bytes) -> None:
+    proto 6 0
+    // contract.py:134
+    // self.enforce_step(UInt64(3)) # Full
+    int 3
+    callsub enforce_step
+    // contract.py:135
+    // self.require_owner()
+    callsub require_owner
+    // contract.py:136
+    // self.require_payment(self.owner, UInt64(1000))
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    int 1000
+    callsub require_payment
+    // contract.py:137-145
+    // itxn.KeyRegistration(
+    //     vote_key=vote_k,
+    //     selection_key=sel_k,
+    //     vote_first=vote_fst.native,
+    //     vote_last=vote_lst.native,
+    //     vote_key_dilution=vote_kd.native,
+    //     state_proof_key=sp_key,
+    //     fee=1000
+    // ).submit()
+    itxn_begin
+    // contract.py:140
+    // vote_first=vote_fst.native,
+    frame_dig -4
+    btoi
+    // contract.py:141
+    // vote_last=vote_lst.native,
+    frame_dig -3
+    btoi
+    // contract.py:142
+    // vote_key_dilution=vote_kd.native,
+    frame_dig -2
+    btoi
+    frame_dig -1
+    itxn_field StateProofPK
+    itxn_field VoteKeyDilution
+    itxn_field VoteLast
+    itxn_field VoteFirst
+    frame_dig -5
+    itxn_field SelectionPK
+    frame_dig -6
+    itxn_field VotePK
+    // contract.py:137
+    // itxn.KeyRegistration(
+    int keyreg
+    itxn_field TypeEnum
+    // contract.py:144
+    // fee=1000
+    int 1000
+    itxn_field Fee
+    // contract.py:137-145
+    // itxn.KeyRegistration(
+    //     vote_key=vote_k,
+    //     selection_key=sel_k,
+    //     vote_first=vote_fst.native,
+    //     vote_last=vote_lst.native,
+    //     vote_key_dilution=vote_kd.native,
+    //     state_proof_key=sp_key,
+    //     fee=1000
+    // ).submit()
+    itxn_submit
+    retsub
+
+
+// contract.SmartContractStaking.withdraw(amount: bytes) -> uint64:
+withdraw:
+    // contract.py:146-169
+    // ##############################################
+    // # function: withdraw
+    // # arguments:
+    // # - amount
+    // # returns:
+    // # - next mab
+    // # purpose: extract funds from contract
+    // # pre-conditions
+    // # - only callable by owner
+    // # - let balance be the current balance of the
+    // #   contract
+    // # - let fee be one fee value
+    // # - balance - amount - fee >= mag
+    // # post-conditions:
+    // # - transfer amount from the contract account
+    // #   to owner
+    // # notes:
+    // # - fee taken out of amount transfered to
+    // #   owner
+    // # - can get amount available for withdra  by
+    // #   simulating zero withdraw
+    // ##############################################
+    // @arc4.abimethod
+    // def withdraw(self, amount: arc4.UInt64) -> UInt64:
+    proto 1 1
+    // contract.py:170
+    // self.enforce_step(UInt64(3)) # Full
+    int 3
+    callsub enforce_step
+    // contract.py:171
+    // self.require_owner()
+    callsub require_owner
+    // contract.py:172
+    // mab = self.calculate_mab()
+    callsub calculate_mab
+    // contract.py:174
+    // balance = op.balance(Global.current_application_address)
+    global CurrentApplicationAddress
+    balance
+    // contract.py:175
+    // min_balance = op.Global.min_balance
+    global MinBalance
+    // contract.py:176
+    // available_balance = balance - min_balance - fee
+    -
+    // contract.py:173
+    // fee = UInt64(1000)
+    int 1000
+    // contract.py:176
+    // available_balance = balance - min_balance - fee
+    -
+    // contract.py:177
+    // assert amount <= available_balance, "amount must be less than or equal to balance"
+    dup
+    itob
+    frame_dig -1
+    b>=
+    assert // amount must be less than or equal to balance
+    // contract.py:178
+    // assert available_balance - amount.native >= mab, "mab available"
+    frame_dig -1
+    btoi
+    dup2
+    -
+    dig 3
+    >=
+    assert // mab available
+    // contract.py:179-182
+    // itxn.Payment(
+    //     amount=amount.native,
+    //     receiver=Txn.sender,
+    // ).submit()
+    itxn_begin
+    // contract.py:181
+    // receiver=Txn.sender,
+    txn Sender
+    itxn_field Receiver
+    dup
+    itxn_field Amount
+    // contract.py:179
+    // itxn.Payment(
+    int pay
+    itxn_field TypeEnum
+    int 0
+    itxn_field Fee
+    // contract.py:179-182
+    // itxn.Payment(
+    //     amount=amount.native,
+    //     receiver=Txn.sender,
+    // ).submit()
+    itxn_submit
+    // contract.py:183
+    // return available_balance - mab - amount.native
+    swap
+    uncover 2
+    -
+    swap
+    -
+    retsub
+
+
+// contract.SmartContractStaking.calculate_mab() -> uint64:
+calculate_mab:
+    // contract.py:303-321
+    // ##############################################
+    // # function: calculate_mab (internal)
+    // # arguments: None
+    // # purpose: calcualte minimum allowable balance
+    // # pre-conditions: None
+    // # post-conditions: None
+    // # notes:
+    // # - let period = number of months to to lockup
+    // #       total = total amount intially funded (airdrop + lockup bonus)
+    // #       y = lockup delays in months
+    // #       p = 1 / (self.period x 12) or 1 / (period)
+    // # - mimumum allowable balance =
+    // #     total x min(1, p x max(0, (period - (now() - funding + y x seconds-in-month)) / seconds-in-month))
+    // # - should be okay to distibute up to 166.67Mi
+    // #   which is over 5 times the highest airdrop
+    // #   amount (10Bi / 60 = 166.67Mi)
+    // ##############################################
+    // @subroutine
+    // def calculate_mab(self) -> UInt64:
+    proto 0 1
+    // contract.py:322
+    // now = Global.latest_timestamp
+    global LatestTimestamp
+    dup
+    // contract.py:325
+    // p = UInt64(12) * self.period # lockup period
+    int 0
+    byte "period"
+    app_global_get_ex
+    assert // check period exists
+    int 12
+    *
+    swap
+    // contract.py:326
+    // if now < self.funding + y * seconds_in_month: # before lockup (0 or funding)
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    int 31536000
+    +
+    <
+    bz calculate_mab_else_body@2
+    // contract.py:327
+    // return self.funding
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    frame_bury 0
+    retsub
+
+calculate_mab_else_body@2:
+    // contract.py:328
+    // elif now > self.funding + (y + p) * seconds_in_month: # after lockup
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    // contract.py:323
+    // y = UInt64(12) # lockup delay
+    int 12
+    // contract.py:328
+    // elif now > self.funding + (y + p) * seconds_in_month: # after lockup
+    frame_dig 1
+    +
+    // contract.py:324
+    // seconds_in_month = UInt64(2628000)
+    int 2628000
+    // contract.py:328
+    // elif now > self.funding + (y + p) * seconds_in_month: # after lockup
+    *
+    +
+    frame_dig 0
+    <
+    bz calculate_mab_else_body@4
+    // contract.py:329
+    // return UInt64(0)
+    int 0
+    frame_bury 0
+    retsub
+
+calculate_mab_else_body@4:
+    // contract.py:331
+    // m =  (now - (self.funding + y * seconds_in_month)) // seconds_in_month # elapsed months
+    int 0
+    byte "funding"
+    app_global_get_ex
+    assert // check funding exists
+    int 31536000
+    +
+    frame_dig 0
+    swap
+    -
+    // contract.py:324
+    // seconds_in_month = UInt64(2628000)
+    int 2628000
+    // contract.py:331
+    // m =  (now - (self.funding + y * seconds_in_month)) // seconds_in_month # elapsed months
+    /
+    // contract.py:332
+    // return (self.total * (p - m)) // p
+    int 0
+    byte "total"
+    app_global_get_ex
+    assert // check total exists
+    frame_dig 1
+    dup
+    cover 3
+    uncover 2
+    -
+    *
+    swap
+    /
+    frame_bury 0
+    retsub
+
+
+// contract.SmartContractStaking.transfer(owner: bytes) -> void:
+transfer:
+    // contract.py:184-198
+    // ##############################################
+    // # function: transfer
+    // # arguments:
+    // # - owner, new owner
+    // # purpose: change owner
+    // # pre-conditions
+    // # - only callable by the owner
+    // # post-conditions:
+    // # - new owner
+    // # notes:
+    // # - fee taken out of amount transfered to
+    // #   owner
+    // ##############################################
+    // @arc4.abimethod
+    // def transfer(self, owner: arc4.Address) -> None:
+    proto 1 0
+    // contract.py:199
+    // self.enforce_step(UInt64(3)) # Full
+    int 3
+    callsub enforce_step
+    // contract.py:200
+    // self.require_owner()
+    callsub require_owner
+    // contract.py:201
+    // assert self.owner != owner.native, "new owner must not be owner"
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    frame_dig -1
+    !=
+    assert // new owner must not be owner
+    // contract.py:202
+    // self.owner = owner.native
+    byte "owner"
+    frame_dig -1
+    app_global_put
+    retsub
+
+
+// contract.SmartContractStaking.close() -> void:
+close:
+    // contract.py:203-214
+    // ##############################################
+    // # function: close
+    // # arguments: None
+    // # purpose: deletes contract
+    // # pre-conditions:
+    // # - mab is 0
+    // # post-conditions:
+    // # - contract is deleted
+    // # - account closed out to owner if it has a balance
+    // ##############################################
+    // @arc4.abimethod
+    // def close(self) -> None:
+    proto 0 0
+    // contract.py:215
+    // self.enforce_step(UInt64(4)) # Full
+    int 4
+    callsub enforce_step
+    // contract.py:216-218
+    // # assert Txn.sender is owner
+    // # assert mab is 0
+    // self.delete_application()
+    callsub delete_application
+    retsub
+
+
+// contract.SmartContractStaking.delete_application() -> void:
+delete_application:
+    // contract.py:288-298
+    // ##############################################
+    // # function: delete_application (internal)
+    // # arguments: None
+    // # purpose: closes out balance to owner
+    // # pre-conditions:
+    // # - None
+    // # post-conditions:
+    // # - escrow balance zero
+    // ##############################################
+    // @subroutine
+    // def delete_application(self) -> None:
+    proto 0 0
+    // contract.py:299-302
+    // itxn.Payment(
+    //     receiver=Global.creator_address,
+    //     close_remainder_to=self.owner
+    // ).submit()
+    itxn_begin
+    // contract.py:300
+    // receiver=Global.creator_address,
+    global CreatorAddress
+    // contract.py:301
+    // close_remainder_to=self.owner
+    int 0
+    byte "owner"
+    app_global_get_ex
+    assert // check owner exists
+    itxn_field CloseRemainderTo
+    itxn_field Receiver
+    // contract.py:299
+    // itxn.Payment(
+    int pay
+    itxn_field TypeEnum
+    int 0
+    itxn_field Fee
+    // contract.py:299-302
+    // itxn.Payment(
+    //     receiver=Global.creator_address,
+    //     close_remainder_to=self.owner
+    // ).submit()
+    itxn_submit
+    retsub
+
+
+// contract.SmartContractStaking.__init__() -> void:
+__init__:
+    // contract.py:45-52
+    // ##############################################
+    // # function: __init__ (builtin)
+    // # arguments: None
+    // # purpose: construct initial state
+    // # pre-conditions: None
+    // # post-conditions: initial state set
+    // ##############################################
+    // def __init__(self) -> None:
+    proto 0 0
+    // contract.py:53
+    // self.owner = Account()      # zero address
+    byte "owner"
+    global ZeroAddress
+    app_global_put
+    // contract.py:54
+    // self.funder = Account()     # zero address
+    byte "funder"
+    global ZeroAddress
+    app_global_put
+    // contract.py:55
+    // self.period = UInt64()      # 0
+    byte "period"
+    int 0
+    app_global_put
+    // contract.py:56
+    // self.funding = UInt64()     # 0
+    byte "funding"
+    int 0
+    app_global_put
+    // contract.py:57
+    // self.total = UInt64()       # 0
+    byte "total"
+    int 0
+    app_global_put
+    retsub
