@@ -12,35 +12,7 @@ from algopy import (
     subroutine,
     op
 )
-##################################################
-# function: max (internal)
-# arguments
-# - a, a number
-# - b, a number
-# purpose: determine greater of two numbers
-# pre-conditions: None
-# post-conditions: None
-# notes:
-# - use ifs
-##################################################
-@subroutine
-def max(a: UInt64, b: UInt64) -> UInt64:
-    return a
-##################################################
-# function: min (internal)
-# arguments
-# - a, a number
-# - b, a number
-# purpose: determine greater of two numbers
-# pre-conditions: None
-# post-conditions: None
-# notes:
-# - use ifs
-##################################################
-@subroutine
-def min(a: UInt64, b: UInt64) -> UInt64:
-    return a
-##################################################
+
 class SmartContractStaking(ARC4Contract):
     ##############################################
     # function: __init__ (builtin)
