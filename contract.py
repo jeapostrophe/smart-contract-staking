@@ -4,13 +4,15 @@ from algopy import (
     Bytes,
     Global,
     GlobalState,
+    OnCompleteAction,
+    TemplateVar,
     Txn,
     UInt64,
     arc4,
-    itxn,
     gtxn,
+    itxn,
+    op,
     subroutine,
-    op
 )
 
 class SmartContractStaking(ARC4Contract):
@@ -120,7 +122,7 @@ class SmartContractStaking(ARC4Contract):
     # arguments:
     # - amount
     # returns:
-    # - next mab
+    # - mab
     # purpose: extract funds from contract
     # pre-conditions
     # - only callable by owner
@@ -132,27 +134,21 @@ class SmartContractStaking(ARC4Contract):
     # - transfer amount from the contract account
     #   to owner
     # notes:
-    # - fee taken out of amount transfered to 
-    #   owner
-    # - can get amount available for withdra  by
-    #   simulating zero withdraw
+    # - 2 fees
     ##############################################
     @arc4.abimethod
     def withdraw(self, amount: arc4.UInt64) -> UInt64:
         self.enforce_step(UInt64(3)) # Full
         self.require_owner()
         mab = self.calculate_mab()
-        fee = UInt64(1000)
-        balance = op.balance(Global.current_application_address)
-        min_balance = op.Global.min_balance
-        available_balance = balance - min_balance - fee
-        assert amount <= available_balance, "balance available"
+        available_balance = self.get_available_balance()
         assert available_balance - amount.native >= mab, "mab available"
-        itxn.Payment(
-            amount=amount.native,
-            receiver=Txn.sender,
-        ).submit()
-        return available_balance - mab - amount.native
+        if amount > 0:
+            itxn.Payment(
+                amount=amount.native,
+                receiver=Txn.sender,
+            ).submit()
+        return mab
     ##############################################
     # function: transfer
     # arguments:
@@ -181,13 +177,39 @@ class SmartContractStaking(ARC4Contract):
     # post-conditions:
     # - contract is deleted
     # - account closed out to owner if it has a balance
+    # - 2 fees
+    # notes:
+    # - should be alled with onCompletion
+    #   deleteApplication
     ##############################################
-    @arc4.abimethod
+    @arc4.abimethod(allow_actions=[
+        OnCompleteAction.DeleteApplication
+    ])
     def close(self) -> None:
-        self.enforce_step(UInt64(4)) # Full
+        self.enforce_step(UInt64(3)) # Full
         self.require_owner()
         assert self.calculate_mab() == 0, "mab is zero"
-        self.delete_application()
+        oca = Txn.on_completion
+        if oca == OnCompleteAction.DeleteApplication:
+            available_balance = self.get_available_balance()
+            if available_balance > 0:
+                itxn.Payment(
+                    receiver=Global.creator_address,
+                    close_remainder_to=self.owner
+                ).submit()
+    ##############################################
+    # function: get_available_balance (internal)
+    # arguments: None
+    # purpose: get available balance
+    # pre-conditions: None
+    # post-conditions: None
+    ##############################################
+    @subroutine
+    def get_available_balance(self) -> UInt64:
+        balance = op.balance(Global.current_application_address)
+        min_balance = op.Global.min_balance
+        available_balance = balance - min_balance
+        return available_balance
     ##############################################
     # function: require_payment (internal)
     # arguments: None
@@ -267,21 +289,6 @@ class SmartContractStaking(ARC4Contract):
                 assert self.funding > 0, "funding must be initialized"
                 assert self.total > 0, "total must be initialized"
     ##############################################
-    # function: delete_application (internal)
-    # arguments: None
-    # purpose: closes out balance to owner
-    # pre-conditions:
-    # - None
-    # post-conditions:
-    # - escrow balance zero
-    ##############################################
-    @subroutine
-    def delete_application(self) -> None:
-        itxn.Payment(
-            receiver=Global.creator_address,
-            close_remainder_to=self.owner
-        ).submit()
-    ##############################################
     # function: calculate_mab (internal)
     # arguments: None
     # purpose: calcualte minimum allowable balance
@@ -290,7 +297,7 @@ class SmartContractStaking(ARC4Contract):
     # notes:
     # - let period = number of months to to lockup
     #       total = total amount intially funded (airdrop + lockup bonus)
-    #       y = lockup delays in months
+    #       y = vesting delay in months
     #       p = 1 / (self.period x 12) or 1 / (period)
     # - mimumum allowable balance =
     #     total x min(1, p x max(0, (period - (now() - funding + y x seconds-in-month)) / seconds-in-month))
@@ -298,20 +305,20 @@ class SmartContractStaking(ARC4Contract):
     @subroutine
     def calculate_mab(self) -> UInt64:
         now = Global.latest_timestamp
-        y = UInt64(12) # vesting delay
-        seconds_in_month = UInt64(2628000)
-        p = UInt64(12) * self.period # lockup period
-        locked_up = now < self.funding + p * seconds_in_month
-        fully_vested = now >= self.funding + (y + p) * seconds_in_month
-        lockup_seconds = p * seconds_in_month
+        y = TemplateVar[UInt64]("VESTING_DELAY") # vesting delay
+        seconds_in_period = TemplateVar[UInt64]("PERIOD_SECONDS") 
+        p = TemplateVar[UInt64]("LOCKUP_DELAY") * self.period # lockup period
+        locked_up = now < self.funding + p * seconds_in_period
+        fully_vested = now >= self.funding + (y + p) * seconds_in_period
+        lockup_seconds = p * seconds_in_period
         # if locked up then total
         # elif fully vested then zero
-        # else calculate mab using elapsed months
+        # else calculate mab using elapsed periods
         if locked_up: #  if locked up then total
             return self.total 
         elif fully_vested: #  elif fully vested then zero
             return UInt64(0) 
-        else: #  else calculate mab using elapsed months
-            m =  (now - (self.funding + lockup_seconds)) // seconds_in_month # elapsed months after lockup
+        else: #  else calculate mab using elapsed periods
+            m =  (now - (self.funding + lockup_seconds)) // seconds_in_period # elapsed period after lockup
             return (self.total * (y - m)) // y
 
