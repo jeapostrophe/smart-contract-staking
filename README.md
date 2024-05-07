@@ -17,3 +17,10 @@ algokit generate client SmartContractStaking.arc32.json --language typescript --
 algokit generate client SmartContractStaking.arc32.json --language python --output SmartContractStakingClient.py
 ```
 
+### simulate
+
+![simulate-mab](https://github.com/temptemp3/smart-contract-staking/assets/23183451/ce990421-eda1-4d85-8dd4-3202ab5d50c6)
+
+```
+python simulate.py
+```
