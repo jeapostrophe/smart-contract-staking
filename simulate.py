@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import csv
 from datetime import datetime, timedelta
 
 def get_apr(period):
@@ -92,6 +93,23 @@ for x in x_values:
     y_values.append(y)
 
 
+# CSV
+
+y0 = [inner_array[0] for inner_array in y_values]
+y1 = [inner_array[1] for inner_array in y_values]
+y2 = [inner_array[2] for inner_array in y_values]
+y3 = [inner_array[3] for inner_array in y_values]
+y4 = [inner_array[4] for inner_array in y_values]
+y5 = [inner_array[5] for inner_array in y_values]
+
+data = zip(x_values, y0, y1, y2, y3, y4, y5)
+csv_file_path = 'simulate.csv'
+with open(csv_file_path, 'w', newline='') as csv_file:
+    writer = csv.writer(csv_file)
+    writer.writerow(['X', 'Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5'])  # Write header
+    writer.writerows(data)
+
+
 # Plot
 plt.plot(
     #x_values, 
@@ -103,9 +121,3 @@ plt.xlabel('t')
 plt.title('MAB over time by lockup period')
 plt.legend()
 plt.show()
-
-
-
-
-
-
